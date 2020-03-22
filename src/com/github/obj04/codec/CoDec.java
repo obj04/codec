@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 
 public class CoDec {
     public static UILanguage lang = new UILanguage("preferredLanguagePack.tt");
+    public static Charset charset = new Charset(9);
     static JFrame mainWindow;
 
     public static void main(String[] args) {
@@ -21,7 +22,7 @@ public class CoDec {
         caesar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                new CaesarWindow();
+                new CaesarWindow(new Charset(1));
             }
         });
 

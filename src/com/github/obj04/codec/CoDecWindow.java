@@ -5,12 +5,12 @@ import java.awt.*;
 import java.awt.event.*;
 
 public abstract class CoDecWindow extends JFrame {
-    JTextArea plain;
-    JPanel midPanel;
-    JButton encButton;
-    JButton decButton;
+    protected JTextArea plain;
+    protected JTextArea cipher;
+    protected JPanel midPanel;
+    protected JButton encButton;
+    protected JButton decButton;
     protected JPanel keyGUI;
-    JTextArea cipher;
 
     public CoDecWindow(String title) {
         super(title);
@@ -28,7 +28,7 @@ public abstract class CoDecWindow extends JFrame {
             }
         });
         decButton = new JButton("<<");
-        encButton.addActionListener(new ActionListener() {
+        decButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 decrypt();
