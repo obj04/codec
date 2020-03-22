@@ -14,7 +14,7 @@ public abstract class CoDecWindow extends JFrame {
 
     public CoDecWindow(String title) {
         super(title);
-        setLayout(new GridLayout(1, 3));
+        setLayout(new BoxLayout(this.getContentPane(), BoxLayout.X_AXIS));
         plain = new JTextArea("Klartext");
         midPanel = new JPanel();
         cipher = new JTextArea("Ciphertext");
@@ -40,7 +40,11 @@ public abstract class CoDecWindow extends JFrame {
         midPanel.add(keyGUI, BorderLayout.CENTER);
 
         add(plain);
+        add(new JSeparator(JSeparator.VERTICAL));
+        add(new JSeparator(JSeparator.VERTICAL));
         add(midPanel);
+        add(new JSeparator(JSeparator.VERTICAL));
+        add(new JSeparator(JSeparator.VERTICAL));
         add(cipher);
     }
 

@@ -7,28 +7,18 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 
-public class CaesarWindow extends CoDecWindow {
+public class VigenereWindow extends CoDecWindow {
     static UILanguage lang = CoDec.lang;
     Charset alphabet;
-    JSpinner pawningValue;
+    JTextArea key;
 
-    public CaesarWindow(Charset charset) {
-        super(lang.get("Caesar Cipher"));
+    public VigenereWindow(Charset charset) {
+        super(lang.get("Vigenere Cipher"));
         this.alphabet = charset;
-        this.pawningValue = new JSpinner();
+        this.key = new JTextArea();
 
-        keyGUI.setLayout(new BoxLayout(keyGUI, BoxLayout.Y_AXIS));
-        keyGUI.add(new KeyField("Pawning value", pawningValue));
-        pawningValue.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent changeEvent) {
-                int value = (int) pawningValue.getValue();
-                if(value < 0)
-                    pawningValue.setValue(alphabet.length() - 1);
-                if(value >= alphabet.length())
-                    pawningValue.setValue(0);
-            }
-        });
+        keyGUI.setLayout(new GridLayout(1, 2));
+        keyGUI.add(new KeyField("Key", key));
 
         setSize(400, 120);
         moveToMiddle();
@@ -37,10 +27,11 @@ public class CaesarWindow extends CoDecWindow {
 
     @Override
     public void encrypt() {
-        int pawningValue = (int) this.pawningValue.getValue();
+        String key = this.key.getText();
         String input = this.plain.getText();
         String result = "";
         for(int i = 0; i < input.length(); i++) {
+            int pawningValue = this.alphabet.indexOf(key.charAt(i % key.length()));
             result += this.alphabet.pawn(input.charAt(i), pawningValue);
         }
         this.cipher.setText(result);
@@ -48,10 +39,11 @@ public class CaesarWindow extends CoDecWindow {
 
     @Override
     public void decrypt() {
-        int pawningValue = this.alphabet.length() - (int) this.pawningValue.getValue();
+        String key = this.key.getText();
         String input = this.cipher.getText();
         String result = "";
         for(int i = 0; i < input.length(); i++) {
+            int pawningValue = this.alphabet.length() - this.alphabet.indexOf(key.charAt(i % key.length()));
             result += this.alphabet.pawn(input.charAt(i), pawningValue);
         }
         this.plain.setText(result);

@@ -42,8 +42,15 @@ public class Charset {
         return this.characters.length();
     }
 
+    public int indexOf(char character) {
+        int result = this.characters.indexOf(character);
+        if(result == -1)
+            return 0;
+        return result;
+    }
+
     public char pawn(char character, int pawningValue) {
-        int index = this.characters.indexOf(character);
+        int index = this.indexOf(character);
         return this.characters.charAt((index + pawningValue) % this.length());
     }
 }
