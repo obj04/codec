@@ -1,6 +1,7 @@
 package com.github.obj04.codec;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class KeyField extends JPanel {
     static UILanguage lang = CoDec.lang;
@@ -10,9 +11,8 @@ public class KeyField extends JPanel {
         super();
         this.comp = comp;
 
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        this.add(new JLabel(lang.get(label)));
-        this.add(new JSeparator(JSeparator.VERTICAL));
-        this.add(this.comp);
+        setLayout(new BorderLayout());
+        add(new JLabel(lang.get(label)), BorderLayout.WEST);
+        add(this.comp, BorderLayout.CENTER);
     }
 }

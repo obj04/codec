@@ -33,8 +33,17 @@ public class CoDec {
             }
         });
 
+        JButton enigma = new JButton(lang.get("Enigma"));
+        enigma.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                new EnigmaWindow(new Charset(1));
+            }
+        });
+
         mainWindow.add(caesar);
         mainWindow.add(vigenere);
+        mainWindow.add(enigma);
         mainWindow.setVisible(true);
     }
 
