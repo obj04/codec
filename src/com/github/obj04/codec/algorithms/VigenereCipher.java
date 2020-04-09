@@ -7,14 +7,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 
-public class VigenereWindow extends CoDecWindow {
+public class VigenereCipher extends CoDecWindow {
     static UILanguage lang = CoDec.lang;
-    Charset alphabet;
     JTextArea key;
 
-    public VigenereWindow(Charset charset) {
+    public VigenereCipher() {
         super(lang.get("Vigenere Cipher"));
-        this.alphabet = charset;
         this.key = new JTextArea();
 
         keyGUI.setLayout(new GridLayout(1, 2));
@@ -31,8 +29,8 @@ public class VigenereWindow extends CoDecWindow {
         String input = this.plain.getText();
         String result = "";
         for(int i = 0; i < input.length(); i++) {
-            int pawningValue = this.alphabet.indexOf(key.charAt(i % key.length()));
-            result += this.alphabet.pawn(input.charAt(i), pawningValue);
+            int pawningValue = Alphabet.indexOf(key.charAt(i % key.length()));
+            result += Alphabet.pawn(input.charAt(i), pawningValue);
         }
         this.cipher.setText(result);
     }
@@ -43,8 +41,8 @@ public class VigenereWindow extends CoDecWindow {
         String input = this.cipher.getText();
         String result = "";
         for(int i = 0; i < input.length(); i++) {
-            int pawningValue = this.alphabet.length() - this.alphabet.indexOf(key.charAt(i % key.length()));
-            result += this.alphabet.pawn(input.charAt(i), pawningValue);
+            int pawningValue = Alphabet.LENGTH - Alphabet.indexOf(key.charAt(i % key.length()));
+            result += Alphabet.pawn(input.charAt(i), pawningValue);
         }
         this.plain.setText(result);
     }

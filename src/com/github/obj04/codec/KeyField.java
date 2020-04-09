@@ -12,7 +12,7 @@ public class KeyField extends JPanel {
         this.comp = comp;
 
         setLayout(new BorderLayout());
-        add(new JLabel(lang.get(label)), BorderLayout.WEST);
+        add(new JLabel(lang.get(label) + ": "), BorderLayout.WEST);
         add(this.comp, BorderLayout.CENTER);
     }
 }

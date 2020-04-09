@@ -34,17 +34,15 @@ public abstract class CoDecWindow extends JFrame {
                 decrypt();
             }
         });
-        keyGUI = new JPanel();
         midPanel.add(encButton, BorderLayout.NORTH);
         midPanel.add(decButton, BorderLayout.SOUTH);
-        midPanel.add(keyGUI, BorderLayout.CENTER);
+        keyGUI = new JPanel();
+        JPanel keyGUIWrapper = new JPanel();
+        keyGUIWrapper.add(keyGUI);
+        midPanel.add(keyGUIWrapper, BorderLayout.CENTER);
 
         add(plain);
-        add(new JSeparator(JSeparator.VERTICAL));
-        add(new JSeparator(JSeparator.VERTICAL));
         add(midPanel);
-        add(new JSeparator(JSeparator.VERTICAL));
-        add(new JSeparator(JSeparator.VERTICAL));
         add(cipher);
     }
 
