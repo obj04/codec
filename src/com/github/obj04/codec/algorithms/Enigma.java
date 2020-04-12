@@ -51,11 +51,13 @@ public class Enigma extends CoDecWindow {
             }
         });
 
-        //keyGUI.setLayout(new BoxLayout(keyGUI, BoxLayout.Y_AXIS));
+        enigma = new VirtualEnigma(modelSelect.getSelectedItem() + ".conf");
         keyGUI.setLayout(new GridLayout(3, 1));
         keyGUI.add(new KeyField("Model", this.modelSelect));
         keyGUI.add(createButton);
         keyGUI.add(editButton);
+
+        plain.setText("xxixxszd");
 
         setSize(400, 160);
         moveToMiddle();
@@ -71,45 +73,95 @@ public class Enigma extends CoDecWindow {
 
     @Override
     public void encrypt() {
-        return;
+        String input = this.plain.getText().toUpperCase();
+        String result = "";
+        enigma.reset();
+        for(int i = 0; i < input.length(); i++) {
+            result += enigma.run(input.charAt(i));
+        }
+        this.cipher.setText(result);
     }
 
     @Override
     public void decrypt() {
-        return;
+        String input = this.cipher.getText().toUpperCase();
+        String result = "";
+        enigma.reset();
+        for(int i = 0; i < input.length(); i++) {
+            result += enigma.run(input.charAt(i));
+        }
+        this.plain.setText(result);
     }
+
+
 
     class VirtualEnigma {
         String presetFileName;
-        ArrayList<Cylinder> cylinders;
-        ArrayList<Reflector> reflectors;
+        ArrayList<Cylinder> cylinders = new ArrayList<>();
+        ArrayList<Reflector> reflectors = new ArrayList<>();
+        ArrayList<Integer> cylinderSequence = new ArrayList<>();
         int usedReflector = 0;
 
         public VirtualEnigma() {
-            this.cylinders = new ArrayList<>();
-            this.reflectors = new ArrayList<>();
+            return;
         }
 
         public VirtualEnigma(String presetFileName) {
-            this.cylinders = new ArrayList<>();
-            this.reflectors = new ArrayList<>();
             this.presetFileName = presetFileName;
             load();
         }
 
-        public char run(char input) {
-            int cylCount = cylinders.size();
-            char output = input;
-            for(int i = 0; i < cylCount; i++) {
-                output = cylinders.get(i).sendForwards(output);
-            }
-            output = reflectors.get(usedReflector).send(output);
+        void log(String msg) {
+            System.out.print(msg);
+        }
+
+        String getCylPos() {
+            int cylCount = cylinderSequence.size();
+            String cylPos = "";
             for(int i = cylCount - 1; i >= 0; i--) {
-                output = cylinders.get(i).sendBackwards(output);
+                cylPos += "" + Alphabet.get(cylinders.get(cylinderSequence.get(i)).pos);
+            }
+            return cylPos;
+        }
+
+        public char run(char input) {
+            int cylCount = cylinderSequence.size();
+            char output = input;
+            log("\n");
+            tick();
+            log("Position: " + getCylPos() + "\n");
+            for(int i = cylCount - 1; i >= 0; i--) {
+                Cylinder cyl = cylinders.get(cylinderSequence.get(i));
+                log(cyl.label + ": " + output);
+                output = cyl.sendForwards(output);
+                log("->" + output + "\n");
+            }
+            Reflector ref = reflectors.get(usedReflector);
+            log(ref.label + ": " + output);
+            output = ref.send(output);
+            log("->" + output + "\n");
+            for(int i = 0; i < cylCount; i++) {
+                Cylinder cyl = cylinders.get(cylinderSequence.get(i));
+                log(cyl.label + ": " + output);
+                output = cyl.sendBackwards(output);
+                log("->" + output + "\n");
             }
             return output;
         }
 
+        public void tick() {
+            int cylCount = cylinderSequence.size();
+            for(int i = cylCount - 1; i >= 0; i--) {
+                if(!cylinders.get(cylinderSequence.get(i)).rotate())
+                    break;
+            }
+        }
+
+        public void reset() {
+            for(Cylinder cyl : cylinders) {
+                cyl.reset();
+            }
+        }
 
         public void setup() {
             JFrame f = new JFrame();
@@ -153,8 +205,11 @@ public class Enigma extends CoDecWindow {
                     } else {
                         if(scope.equals("cylinders")) {
                             String cylName = line.split(":", 2)[0].strip();
-                            String cylWiring = line.split(":", 2)[1].strip();
-                            cylinders.add(new Cylinder(cylName, 0, cylWiring));
+                            String cylAttrs = line.split(":", 2)[1].strip();
+                            String cylWiring = cylAttrs.split(" ", 2)[0].strip();
+                            String cylCarry = cylAttrs.split(" ", 2)[1].strip();
+                            System.out.println(cylName + " " + cylWiring + " " + cylCarry);
+                            cylinders.add(new Cylinder(cylName, 'A', cylWiring, cylCarry));
                         } else if(scope.equals("reflectors")) {
                             String refName = line.split(":", 2)[0].strip();
                             String refWiring = line.split(":", 2)[1].strip();
@@ -163,8 +218,8 @@ public class Enigma extends CoDecWindow {
                     }
                     line = presetFile.readLine();
                 } while (line != null);
-            } catch (EOFException e) {
-                return;
+                for(int i = 0; i < cylinders.size(); i++)
+                    cylinderSequence.add(i);
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, lang.get("File could not be created") + ":\n" + presetFilePath, lang.get("Error"), JOptionPane.ERROR_MESSAGE);
             }
@@ -178,17 +233,17 @@ public class Enigma extends CoDecWindow {
                 presetFile.writeBytes("cylinders:\n");
                 for(Cylinder cyl : this.cylinders) {
                     presetFile.writeBytes("  " + cyl.label + ": ");
-                    for(char[] connection : cyl.wiring) {
-                        presetFile.writeByte(connection[1]);
+                    for(int[] connection : cyl.wiring) {
+                        presetFile.writeByte(Alphabet.get(connection[1]));
                     }
                     presetFile.writeBytes("\n");
                 }
                 presetFile.writeBytes("reflectors:\n");
                 for(Cylinder cyl : this.cylinders) {
                     presetFile.writeBytes("  " + cyl.label + ": ");
-                    for(char[] connection : cyl.wiring) {
-                        presetFile.writeByte(connection[0]);
-                        presetFile.writeByte(connection[1]);
+                    for(int[] connection : cyl.wiring) {
+                        presetFile.writeByte(Alphabet.get(connection[0]));
+                        presetFile.writeByte(Alphabet.get(connection[1]));
                     }
                     presetFile.writeBytes("\n");
                 }
@@ -198,44 +253,66 @@ public class Enigma extends CoDecWindow {
         }
 
 
+
         class Cylinder {
             String label;
             int startPos;
-            char[][] wiring;
+            int pos;
+            int[][] wiring;
+            ArrayList<Integer> carryNotches = new ArrayList<>();
 
-            public Cylinder(String label, int pos, String outputs) {
+            public Cylinder(String label, char pos, String outputs, String notches) {
                 this.label = label;
-                this.startPos = pos;
-                this.wiring = new char[26][2];
+                this.startPos = Alphabet.indexOf(pos);
+                this.pos = startPos;
+                this.wiring = new int[26][2];
                 for(int i = 0; i < 26; i++) {
-                    this.wiring[i][0] = Alphabet.get(i);
-                    this.wiring[i][1] = outputs.charAt(i);
+                    this.wiring[i][0] = i;
+                    this.wiring[i][1] = Alphabet.indexOf(outputs.charAt(i));
                 }
+                for(char carryChar : notches.toCharArray())
+                    this.carryNotches.add(Alphabet.indexOf(carryChar));
+            }
+
+            public void reset() {
+                pos = startPos;
             }
 
             public char sendForwards(char a) {
+                int input = Alphabet.indexOf(a) + pos;
+                input %= 26;
                 for(int i = 0; i < 26; i++) {
-                    if(wiring[i][0] == a)
-                        return wiring[(i + startPos) % 26][1];
+                    if(wiring[i][0] == input) {
+                        int output = wiring[i][1] - pos;
+                        if(output < 0)
+                            output += 26;
+                        return Alphabet.get(output);
+                    }
                 }
                 return '?';
             }
 
             public char sendBackwards(char b) {
+                int input = Alphabet.indexOf(b) + pos;
+                input %= 26;
                 for(int i = 0; i < 26; i++) {
-                    if(wiring[(i + startPos) % 26][1] == b)
-                        return wiring[i][0];
+                    if(wiring[i][1] == input) {
+                        int output = wiring[i][0] - pos;
+                        if(output < 0)
+                            output += 26;
+                        return Alphabet.get(output);
+                    }
                 }
                 return '?';
             }
 
             public boolean rotate() {
-                startPos++;
-                if(startPos == 26) {
-                    startPos = 0;
-                    return true;
-                }
-                return false;
+                boolean carry = false;
+                if(carryNotches.contains(pos))
+                    carry = true;
+                pos++;
+                pos %= 26;
+                return carry;
             }
 
             public JPanel getSetup() {
@@ -254,12 +331,26 @@ public class Enigma extends CoDecWindow {
                     wirePanel.add(charLabel);
                 }
 
+                JComboBox<Character> startSelect = new JComboBox<>();
+                for(int i = 0; i < 26; i++)
+                    startSelect.addItem(Alphabet.get(i));
+                startSelect.setSelectedItem(Alphabet.get(startPos));
+                startSelect.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        startPos = Alphabet.indexOf((char) startSelect.getSelectedItem());
+                    }
+                });
+
                 setup.setLayout(new BoxLayout(setup, BoxLayout.Y_AXIS));
                 setup.add(new JLabel(label));
                 setup.add(wirePanel);
+                setup.add(new KeyField("Starting position", startSelect));
                 return setup;
             }
         }
+
+
 
         class Reflector {
             String label;
@@ -269,7 +360,7 @@ public class Enigma extends CoDecWindow {
                 this.label = label;
                 this.wiring = new char[13][2];
                 for(int i = 0; i < 13; i++) {
-                    this.wiring[i][0] = Alphabet.get(2 * i);
+                    this.wiring[i][0] = outputs.charAt(2 * i);
                     this.wiring[i][1] = outputs.charAt(2 * i + 1);
                 }
             }
@@ -278,6 +369,8 @@ public class Enigma extends CoDecWindow {
                 for(char[] wire : wiring) {
                     if(wire[0] == a)
                         return wire[1];
+                    if(wire[1] == a)
+                        return wire[0];
                 }
                 return '?';
             }
