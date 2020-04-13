@@ -4,6 +4,16 @@ public class Alphabet {
     public final static String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public final static int LENGTH = LETTERS.length();
 
+    public static String validate(String input) {
+        input = input.toUpperCase();
+        String output = "";
+        for(int i = 0; i < input.length(); i++) {
+            if(LETTERS.contains("" + input.charAt(i)))
+                output += "" + input.charAt(i);
+        }
+        return output;
+    }
+
     public static char get(int index) {
         return LETTERS.charAt(index);
     }

@@ -2,11 +2,7 @@ package com.github.obj04.codec.algorithms;
 
 import com.github.obj04.codec.*;
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,11 +10,10 @@ import java.io.*;
 import java.util.*;
 
 public class Enigma extends CoDecWindow {
-    static UILanguage lang = CoDec.lang;
     static String presetDir = "enigmaModels/";
     JComboBox<String> modelSelect;
     VirtualEnigma enigma;
-    JButton createButton;
+    //JButton createButton;
     JButton editButton;
 
     public Enigma() {
@@ -32,34 +27,27 @@ public class Enigma extends CoDecWindow {
             }
         });
 
-        createButton = new JButton(lang.get("New"));
-        createButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                enigma = new VirtualEnigma();
-                enigma.setup();
-            }
-        });
+        /*createButton = new JButton(lang.get("New"));
+        createButton.addActionListener(actionEvent -> {
+            enigma = new VirtualEnigma();
+            enigma.setup();
+        });*/
 
         editButton = new JButton(lang.get("Edit"));
-        editButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                if(enigma == null)
-                    enigma = new VirtualEnigma(modelSelect.getSelectedItem() + ".conf");
-                enigma.setup();
-            }
+        editButton.addActionListener(actionEvent ->  {
+            if(enigma == null)
+                enigma = new VirtualEnigma(modelSelect.getSelectedItem() + ".conf");
+            enigma.setup();
         });
 
         enigma = new VirtualEnigma(modelSelect.getSelectedItem() + ".conf");
-        keyGUI.setLayout(new GridLayout(3, 1));
+        keyGUI.setLayout(new GridLayout(2, 1));
         keyGUI.add(new KeyField("Model", this.modelSelect));
-        keyGUI.add(createButton);
+        //keyGUI.add(createButton);
         keyGUI.add(editButton);
-
-        plain.setText("xxixxszd");
-
+        
         setSize(400, 160);
+        pack();
         moveToMiddle();
         setVisible(true);
     }
@@ -73,7 +61,8 @@ public class Enigma extends CoDecWindow {
 
     @Override
     public void encrypt() {
-        String input = this.plain.getText().toUpperCase();
+        String input = Alphabet.validate(this.plain.getText());
+        this.plain.setText(input);
         String result = "";
         enigma.reset();
         for(int i = 0; i < input.length(); i++) {
@@ -84,7 +73,8 @@ public class Enigma extends CoDecWindow {
 
     @Override
     public void decrypt() {
-        String input = this.cipher.getText().toUpperCase();
+        String input = Alphabet.validate(this.cipher.getText());
+        this.cipher.setText(input);
         String result = "";
         enigma.reset();
         for(int i = 0; i < input.length(); i++) {
@@ -170,12 +160,12 @@ public class Enigma extends CoDecWindow {
             JPanel cylPanel = new JPanel();
             for(Cylinder cyl : this.cylinders) {
                 cylPanel.add(cyl.getSetup());
-                cylPanel.add(new JSeparator());
+                cylPanel.add(new JPanel());
             }
             JPanel refPanel = new JPanel();
             for(Reflector ref : this.reflectors) {
                 refPanel.add(ref.getSetup());
-                refPanel.add(new JSeparator());
+                refPanel.add(new JPanel());
             }
 
             cylPanel.setLayout(new BoxLayout(cylPanel, BoxLayout.Y_AXIS));
@@ -321,12 +311,12 @@ public class Enigma extends CoDecWindow {
                 JPanel wirePanel = new JPanel();
                 wirePanel.setLayout(new GridLayout(2, 26));
                 for(int i = 0; i < 26; i++) {
-                    JLabel charLabel = new JLabel(String.valueOf(wiring[i][0]));
+                    JLabel charLabel = new JLabel("" + Alphabet.get(wiring[i][0]));
                     charLabel.setBorder(LineBorder.createGrayLineBorder());
                     wirePanel.add(charLabel);
                 }
                 for(int i = 0; i < 26; i++) {
-                    JLabel charLabel = new JLabel(String.valueOf(wiring[i][1]));
+                    JLabel charLabel = new JLabel("" + Alphabet.get(wiring[i][1]));
                     charLabel.setBorder(LineBorder.createGrayLineBorder());
                     wirePanel.add(charLabel);
                 }
@@ -346,7 +336,11 @@ public class Enigma extends CoDecWindow {
                 setup.add(new JLabel(label));
                 setup.add(wirePanel);
                 setup.add(new KeyField("Starting position", startSelect));
-                return setup;
+
+                JPanel setupWrapper = new JPanel();
+                setupWrapper.add(setup);
+                setupWrapper.setBorder(LineBorder.createGrayLineBorder());
+                return setupWrapper;
             }
         }
 
@@ -394,7 +388,10 @@ public class Enigma extends CoDecWindow {
                 setup.setLayout(new BoxLayout(setup, BoxLayout.Y_AXIS));
                 setup.add(new JLabel(label));
                 setup.add(wirePanel);
-                return setup;
+                JPanel setupWrapper = new JPanel();
+                setupWrapper.add(setup);
+                setupWrapper.setBorder(LineBorder.createGrayLineBorder());
+                return setupWrapper;
             }
         }
     }

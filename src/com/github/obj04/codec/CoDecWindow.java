@@ -5,8 +5,9 @@ import java.awt.*;
 import java.awt.event.*;
 
 public abstract class CoDecWindow extends JFrame {
-    protected JTextArea plain;
-    protected JTextArea cipher;
+    protected static UILanguage lang = CoDec.lang;
+    protected JEditorPane plain;
+    protected JEditorPane cipher;
     protected JPanel midPanel;
     protected JButton encButton;
     protected JButton decButton;
@@ -14,10 +15,12 @@ public abstract class CoDecWindow extends JFrame {
 
     public CoDecWindow(String title) {
         super(title);
-        setLayout(new BoxLayout(this.getContentPane(), BoxLayout.X_AXIS));
-        plain = new JTextArea("Klartext");
+        setLayout(new GridLayout(1, 3));
+        plain = new JEditorPane();
+        plain.setText(lang.get("Plaintext"));
         midPanel = new JPanel();
-        cipher = new JTextArea("Ciphertext");
+        cipher = new JEditorPane();
+        cipher.setText(lang.get("Ciphertext"));
 
         midPanel.setLayout(new BorderLayout());
         encButton = new JButton(">>");
@@ -41,6 +44,10 @@ public abstract class CoDecWindow extends JFrame {
         keyGUIWrapper.add(keyGUI);
         midPanel.add(keyGUIWrapper, BorderLayout.CENTER);
 
+        JPanel plainWrapper = new JPanel();
+        plainWrapper.add(plain);
+        JPanel cipherWrapper = new JPanel();
+        cipherWrapper.add(cipher);
         add(plain);
         add(midPanel);
         add(cipher);

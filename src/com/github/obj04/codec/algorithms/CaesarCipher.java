@@ -5,7 +5,6 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 public class CaesarCipher extends CoDecWindow {
-    static UILanguage lang = CoDec.lang;
     JSpinner pawningValue;
 
     public CaesarCipher() {
@@ -33,7 +32,8 @@ public class CaesarCipher extends CoDecWindow {
     @Override
     public void encrypt() {
         int pawningValue = (int) this.pawningValue.getValue();
-        String input = this.plain.getText();
+        String input = Alphabet.validate(this.plain.getText());
+        this.plain.setText(input);
         String result = "";
         for(int i = 0; i < input.length(); i++) {
             result += Alphabet.pawn(input.charAt(i), pawningValue);
@@ -44,7 +44,8 @@ public class CaesarCipher extends CoDecWindow {
     @Override
     public void decrypt() {
         int pawningValue = Alphabet.LENGTH - (int) this.pawningValue.getValue();
-        String input = this.cipher.getText();
+        String input = Alphabet.validate(this.cipher.getText());
+        this.cipher.setText(input);
         String result = "";
         for(int i = 0; i < input.length(); i++) {
             result += Alphabet.pawn(input.charAt(i), pawningValue);

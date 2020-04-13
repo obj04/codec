@@ -12,9 +12,8 @@ public class CoDec {
 
     public static void main(String[] args) {
         mainWindow = new JFrame("CoDec");
-        mainWindow.setSize(640, 480);
         mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainWindow.setLayout(new FlowLayout());
+        mainWindow.setLayout(new GridLayout(3, 1));
 
         JButton caesar = new JButton(lang.get("Caesar Cipher"));
         caesar.addActionListener(new ActionListener() {
@@ -43,6 +42,7 @@ public class CoDec {
         mainWindow.add(caesar);
         mainWindow.add(vigenere);
         mainWindow.add(enigma);
+        mainWindow.pack();
         mainWindow.setVisible(true);
     }
 
